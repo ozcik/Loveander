@@ -4,136 +4,143 @@
   <meta charset="UTF-8" />
   <title>Offline Calendar PWA</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- Manifest for PWA -->
   <link rel="manifest" href="manifest.json" />
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    #calendar { display: inline-block; margin-top: 20px; }
-    table { border-collapse: collapse; }
-    th, td { border: 1px solid #aaa; padding: 10px; width: 40px; height: 40px; cursor: pointer; }
-    th { background-color: #f0f0f0; }
-    td.done { background-color: #ffe0e0; }
-    td.done::after { content: "❤️"; display: block; font-size: 16px; margin-top: 2px; }
-    #progress-container { width: 300px; margin: 20px auto; background: #eee; border-radius: 5px; overflow: hidden; }
-    #progress-bar { height: 20px; background-color: #ff6666; width: 0%; transition: width 0.3s; }
-    button { margin: 10px; padding: 10px 15px; }
-  </style>
+
+  <!-- Load seasonal stylesheet dynamically -->
+  <script>
+    (function() {
+      const month = new Date().getMonth();
+      let theme;
+      if ([2, 3, 4].includes(month)) theme = 'spring';
+      else if ([5, 6, 7].includes(month)) theme = 'summer';
+      else if ([8, 9, 10].includes(month)) theme = 'autumn';
+      else theme = 'winter';
+
+      const link = document.createElement('link');
+      link.rel = 'stylesheet';
+      link.href = `themes/${theme}.css`;
+      document.head.appendChild(link);
+    })();
+  </script>
 </head>
 <body>
-  <h1>Offline Calendar PWA</h1>
-  <div>
-    <button id="prevMonth">Previous Month</button>
-    <button id="nextMonth">Next Month</button>
+  <div class="container">
+    <h1>Offline Calendar PWA</h1>
+    <div>
+      <button id="prevMonth" aria-label="Previous Month">Previous Month</button>
+      <button id="nextMonth" aria-label="Next Month">Next Month</button>
+    </div>
+    <div id="calendar" role="grid" aria-label="Calendar"></div>
+
+    <div class="progress-container" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="progress-bar" id="progress-bar"></div>
+    </div>
   </div>
-  <div id="calendar"></div>
-  <div id="progress-container">
-    <div id="progress-bar"></div>
-  </div>
 
-<script>
-  // Globals
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
+  <script>
+    const monthNames = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
 
-  let currentYear = new Date().getFullYear();
-  let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let currentMonth = new Date().getMonth();
 
-  // Load done days from localStorage or empty set
-  let doneDays = new Set(JSON.parse(localStorage.getItem('doneDays') || "[]"));
+    let doneDays;
+    try {
+      doneDays = new Set(JSON.parse(localStorage.getItem('doneDays') || "[]"));
+    } catch {
+      doneDays = new Set();
+    }
 
-  function saveDoneDays() {
-    localStorage.setItem('doneDays', JSON.stringify(Array.from(doneDays)));
-  }
+    function saveDoneDays() {
+      localStorage.setItem('doneDays', JSON.stringify(Array.from(doneDays)));
+    }
 
-  // Get day-of-year using fixed non-leap year 2001 for consistency
-  function getDayOfYear(year, month, day) {
-    const start = new Date(year, 0, 0);
-    const current = new Date(year, month, day);
-    const diff = current - start;
-    return Math.floor(diff / (1000 * 60 * 60 * 24));
-  }
+    function getDayOfYear(year, month, day) {
+      const start = new Date(year, 0, 0);
+      const current = new Date(year, month, day);
+      const diff = current - start;
+      return Math.floor(diff / (1000 * 60 * 60 * 24));
+    }
 
-  function daysInMonth(year, month) {
-    return new Date(year, month + 1, 0).getDate();
-  }
+    function daysInMonth(year, month) {
+      return new Date(year, month + 1, 0).getDate();
+    }
 
-  function renderCalendar() {
-    let firstDay = new Date(currentYear, currentMonth, 1).getDay();
-    let daysCount = daysInMonth(currentYear, currentMonth);
-    let html = `<h2>${monthNames[currentMonth]} ${currentYear}</h2>`;
-    html += `<table><thead><tr>
+    function renderCalendar() {
+      let firstDay = new Date(currentYear, currentMonth, 1).getDay();
+      let daysCount = daysInMonth(currentYear, currentMonth);
+      let html = `<h2>${monthNames[currentMonth]} ${currentYear}</h2>`;
+      html += `<table><thead><tr>
         <th>Sun</th><th>Mon</th><th>Tue</th><th>Wed</th>
         <th>Thu</th><th>Fri</th><th>Sat</th></tr></thead><tbody><tr>`;
 
-    for(let i=0; i<firstDay; i++) {
-      html += '<td></td>';
-    }
+      for(let i=0; i<firstDay; i++) html += '<td></td>';
 
-    let dayOfWeekCounter = firstDay;
-    for(let day=1; day<=daysCount; day++) {
-      let doy = getDayOfYear(2001, currentMonth, day).toString();
-      let classes = doneDays.has(doy) ? 'done' : '';
-      html += `<td class="${classes}" data-day="${doy}">${day}</td>`;
-      dayOfWeekCounter++;
-      if(dayOfWeekCounter % 7 === 0) html += '</tr><tr>';
-    }
+      let dayOfWeekCounter = firstDay;
+      for(let day=1; day<=daysCount; day++) {
+        let doy = getDayOfYear(2001, currentMonth, day).toString();
+        let classes = doneDays.has(doy) ? 'calendar-day done' : 'calendar-day';
+        html += `<td class="${classes}" data-day="${doy}" role="gridcell" tabindex="0">${day}</td>`;
+        dayOfWeekCounter++;
+        if(dayOfWeekCounter % 7 === 0) html += '</tr><tr>';
+      }
 
-    while(dayOfWeekCounter % 7 !== 0) {
-      html += '<td></td>';
-      dayOfWeekCounter++;
-    }
+      while(dayOfWeekCounter % 7 !== 0) {
+        html += '<td></td>';
+        dayOfWeekCounter++;
+      }
 
-    html += '</tr></tbody></table>';
+      html += '</tr></tbody></table>';
+      document.getElementById('calendar').innerHTML = html;
 
-    document.getElementById('calendar').innerHTML = html;
-
-    document.querySelectorAll('#calendar td[data-day]').forEach(td => {
-      td.addEventListener('click', () => {
-        let day = td.dataset.day;
-        if(doneDays.has(day)) doneDays.delete(day);
-        else doneDays.add(day);
-        saveDoneDays();
-        renderCalendar();
+      document.querySelectorAll('#calendar td[data-day]').forEach(td => {
+        td.addEventListener('click', () => {
+          let day = td.dataset.day;
+          if(doneDays.has(day)) doneDays.delete(day);
+          else doneDays.add(day);
+          saveDoneDays();
+          renderCalendar();
+        });
       });
-    });
 
-    updateProgressBar();
-  }
-
-  function updateProgressBar() {
-    const totalDays = 365;
-    let percent = (doneDays.size / totalDays) * 100;
-    document.getElementById('progress-bar').style.width = percent + '%';
-  }
-
-  document.getElementById('prevMonth').onclick = () => {
-    currentMonth--;
-    if(currentMonth < 0) {
-      currentMonth = 11;
-      currentYear--;
+      updateProgressBar();
     }
-    renderCalendar();
-  };
 
-  document.getElementById('nextMonth').onclick = () => {
-    currentMonth++;
-    if(currentMonth > 11) {
-      currentMonth = 0;
-      currentYear++;
+    function updateProgressBar() {
+      const totalDays = 365;
+      let percent = (doneDays.size / totalDays) * 100;
+      const progressBar = document.getElementById('progress-bar');
+      progressBar.style.width = percent + '%';
+      progressBar.parentElement.setAttribute('aria-valuenow', percent.toFixed(0));
     }
+
+    document.getElementById('prevMonth').onclick = () => {
+      currentMonth--;
+      if(currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar();
+    };
+
+    document.getElementById('nextMonth').onclick = () => {
+      currentMonth++;
+      if(currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').then(() => {
+        console.log('Service Worker Registered');
+      });
+    }
+
     renderCalendar();
-  };
-
-  // Register service worker for offline support
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(() => {
-      console.log('Service Worker Registered');
-    });
-  }
-
-  renderCalendar();
-</script>
+  </script>
 </body>
 </html>

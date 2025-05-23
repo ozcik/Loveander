@@ -1,0 +1,94 @@
+/* === Summer Theme === */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('summer-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #1565c0;
+}
+
+.container {
+  background-color: rgba(255, 255, 255, 0.85);
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 30px auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #90caf9;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #e3f2fd;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+th {
+  background-color: #bbdefb;
+  color: #0d47a1;
+}
+
+.calendar-day.done {
+  background-color: #64b5f6;
+  font-weight: bold;
+}
+
+.calendar-day.done::after {
+  content: " ☀️";
+  display: block;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.progress-container {
+  width: 100%;
+  background-color: #bbdefb;
+  border-radius: 20px;
+  height: 24px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-shadow: inset 0 0 5px #42a5f5;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #29b6f6, #0288d1);
+  transition: width 0.5s ease;
+}
+
+h1 {
+  text-align: center;
+  color: #0277bd;
+}
+
+h2 {
+  color: #039be5;
+}
+
+button {
+  background-color: #4fc3f7;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 5px;
+}
+
+button:hover {
+  background-color: #039be5;
+}

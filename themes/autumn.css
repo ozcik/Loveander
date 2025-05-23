@@ -1,0 +1,94 @@
+/* === Autumn Theme === */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: url('autumn-bg.jpg') no-repeat center center fixed;
+  background-size: cover;
+  color: #6d4c41;
+}
+
+.container {
+  background-color: rgba(255, 250, 240, 0.85);
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 800px;
+  margin: 30px auto;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+th, td {
+  border: 1px solid #ffe0b2;
+  padding: 10px;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  border-radius: 8px;
+  background-color: #fff3e0;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+th {
+  background-color: #ffcc80;
+  color: #bf360c;
+}
+
+.calendar-day.done {
+  background-color: #ffab91;
+  font-weight: bold;
+}
+
+.calendar-day.done::after {
+  content: " 🍂";
+  display: block;
+  font-size: 16px;
+  margin-top: 2px;
+}
+
+.progress-container {
+  width: 100%;
+  background-color: #ffe0b2;
+  border-radius: 20px;
+  height: 24px;
+  overflow: hidden;
+  margin: 20px 0;
+  box-shadow: inset 0 0 5px #ff7043;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(to right, #ff8a65, #ff7043);
+  transition: width 0.5s ease;
+}
+
+h1 {
+  text-align: center;
+  color: #e65100;
+}
+
+h2 {
+  color: #d84315;
+}
+
+button {
+  background-color: #ff7043;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 5px;
+}
+
+button:hover {
+  background-color: #f4511e;
+}

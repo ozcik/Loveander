@@ -1,27 +1,42 @@
-{
-  "name": "Loveandar",
-  "short_name": "Loveandar",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#81c784",
-  "description": "A simple offline calendar that tracks days with love.",
-  "icons": [
-    {
-      "src": "favicon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "favicon-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    },
-    {
-      "src": "apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png"
-    }
-  ]
-}
+const CACHE_NAME = 'offline-calendar-cache-v2';
+
+const FILES_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './spring-bg.jpg',
+  './summer-bg.jpg',
+  './autumn-bg.jpg',
+  './winter-bg.jpg',
+  './themes/spring.css',
+  './themes/summer.css',
+  './themes/autumn.css',
+  './themes/winter.css',
+];
+
+// Install cache
+self.addEventListener('install', evt => {
+  evt.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
+  );
+  self.skipWaiting();
+});
+
+// Activate - clean up old caches
+self.addEventListener('activate', evt => {
+  evt.waitUntil(
+    caches.keys().then(keys => Promise.all(
+      keys.map(key => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      })
+    ))
+  );
+  self.clients.claim();
+});
+
+// Fetch cached files
+self.addEventListener('fetch', evt => {
+  evt.respondWith(
+    caches.match(evt.request).then(resp => resp || fetch(evt.request))
+  );
+});
